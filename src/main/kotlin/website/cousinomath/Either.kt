@@ -1,6 +1,6 @@
-package website.cousinomath;
+package website.cousinomath
 
-abstract class Either<R, S> {
+sealed class Either<R, S> {
   abstract val isLeft: Boolean
   abstract val isRight: Boolean
   abstract val left: R?
@@ -12,7 +12,7 @@ abstract class Either<R, S> {
   abstract fun <T> either(f: (R) -> T, g: (S) -> T): T;
 }
 
-class Left<R, S>(private val lvalue: R): Either<R, S>() {
+data class Left<R, S>(private val lvalue: R): Either<R, S>() {
   override val isLeft = true
   override val isRight = false
   override val left = lvalue
@@ -24,7 +24,7 @@ class Left<R, S>(private val lvalue: R): Either<R, S>() {
   override fun <T> either(f: (R) -> T, g: (S) -> T): T = f(lvalue)
 }
 
-class Right<R, S>(private val rvalue: S): Either<R, S>() {
+data class Right<R, S>(private val rvalue: S): Either<R, S>() {
   override val isLeft = false
   override val isRight = true
   override val left = null
@@ -38,3 +38,7 @@ class Right<R, S>(private val rvalue: S): Either<R, S>() {
 
 fun <R, S> Collection<Either<R, S>>.lefts(): Collection<R> = this.filter { it.isLeft }.map { it.left!! }
 fun <R, S> Collection<Either<R, S>>.rights(): Collection<S> = this.filter { it.isRight }.map { it.right!! }
+fun <R, S> Collection<Either<R, S>>.partition(): Pair<Collection<R>, Collection<S>> {
+  val (lefts, rights) = this.partition { it.isLeft }
+  return Pair(lefts.map { it.left!! }, rights.map { it.right!! })
+}

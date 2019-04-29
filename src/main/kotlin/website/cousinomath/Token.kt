@@ -1,7 +1,9 @@
+package website.cousinomath
+
 enum class TokenType {
     EQUALS,
     PLUS,
-    MINUS,
+    DASH,
     STAR,
     SLASH,
     CARET,
@@ -9,8 +11,7 @@ enum class TokenType {
     FUNCTION,
     VARIABLE,
     CONSTANT,
+    EOI,
 }
 
-class Token(type: TokenType, token: String) {
-    
-}
+data class Token(val type: TokenType, val lexeme: String, val token: Any? = null)

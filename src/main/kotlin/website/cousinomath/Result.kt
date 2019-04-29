@@ -1,4 +1,6 @@
-abstract class Result<R, S> {
+package website.cousinomath
+
+sealed class Result<R, S> {
     abstract val isOk: Boolean;
     abstract val isErr: Boolean;
     abstract val ok: R?;
@@ -10,11 +12,11 @@ abstract class Result<R, S> {
     abstract fun okOrElse(g: (y: S) -> R): R;
 }
 
-class Ok<R, S>(val okValue: R): Result<R, S>() {
-    override val err(): S? = null
-    override val ok(): R? = okValue
-    override val isOk() = true
-    override val isErr() = false
+data class Ok<R, S>(val okValue: R): Result<R, S>() {
+    override val err: S? = null
+    override val ok: R? = okValue
+    override val isOk: Boolean = true
+    override val isErr: Boolean = false
     override fun expected(msg: String) = okValue
     override fun <U> map(f: (R) -> U): Result<U, S> = Ok(f(okValue))
     override fun <U> mapOrElse(f: (R) -> U, g: (S) -> U): U = f(okValue)
@@ -22,7 +24,7 @@ class Ok<R, S>(val okValue: R): Result<R, S>() {
     override fun okOrElse(g: (S) -> R) = okValue
 }
 
-class Err<R, S>(val errValue: S): Result<R, S>() {
+data class Err<R, S>(val errValue: S): Result<R, S>() {
     override val err: S? = errValue
     override val ok: R? = null
     override val isOk = false

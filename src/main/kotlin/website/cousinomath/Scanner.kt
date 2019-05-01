@@ -8,17 +8,21 @@ class Scanner(val source: String) {
   val constants = setOf("e", "pi")
   val functions = setOf("acos", "asin", "atan", "cos", "exp", "log", "sin", "tan")
 
-  fun lex(): List<Token> {
+  fun lex(): Result<List<Token>, String> {
     if (current == 0) {
       while (current < length) {
         skipWhitespace()
         start = current
         advance()
-        tokens.add(lexToken())
+        val result = lexToken()
+        if (result.isErr) {
+          return Err(result.err!!);
+        }
+        tokens.add(result.ok!!)
       }
       tokens.add(Token(TokenType.EOI, "♠"))
     }
-    return tokens
+    return Ok<List<Token>, String>(tokens)
   }
 
   private fun advance() {
@@ -35,36 +39,42 @@ class Scanner(val source: String) {
 
   private fun substring(): String = source.substring(start, current)
 
-  private fun lexToken(): Token {
+  private fun lexToken(): Result<Token, String> {
     return when (source[start]) {
-      '+' -> Token(TokenType.PLUS, substring())
-      '-' -> Token(TokenType.DASH, substring())
-      '*' -> Token(TokenType.STAR, substring())
-      '/' -> Token(TokenType.SLASH, substring())
-      '=' -> Token(TokenType.EQUALS, substring())
+      '+' -> Ok<Token, String>(Token(TokenType.PLUS, substring()))
+      '-' -> Ok<Token, String>(Token(TokenType.DASH, substring()))
+      '*' -> Ok<Token, String>(Token(TokenType.STAR, substring()))
+      '/' -> Ok<Token, String>(Token(TokenType.SLASH, substring()))
+      '=' -> Ok<Token, String>(Token(TokenType.EQUALS, substring()))
+      '(' -> Ok(Token(TokenType.LPAREN, substring()))
+      ')' -> Ok(Token(TokenType.RPAREN, substring()))
       in '0'..'9', '.' -> lexNumber()
       in 'a'..'z', in 'A'..'Z' -> lexIdentifier()
-      else -> throw UnsupportedOperationException("Unrecognized token ${source[start]}.")
+      else -> Err<Token, String>("Unrecognized token ${source[start]}.")
     }
   }
 
-  private fun lexNumber(): Token {
+  private fun lexNumber(): Result<Token, String> {
     while (current < length && (source[current] in '0'..'9' || source[current] == '.')) {
       advance()
     }
     val substr = substring()
-    return Token(TokenType.NUMBER, substr, java.lang.Double.parseDouble(substr))
+    try {
+      return Ok(Token(TokenType.NUMBER, substr, java.lang.Double.parseDouble(substr)))
+    } catch(nfe: NumberFormatException) {
+      return Err(nfe.getLocalizedMessage())
+    }
   }
 
-  private fun lexIdentifier(): Token {
+  private fun lexIdentifier(): Result<Token, String> {
     while (current < length && (source[current] in 'a'..'z' || source[current] in 'A'..'Z')) {
       advance()
     }
     val substr = substring()
     return when (substr) {
-      in constants -> Token(TokenType.CONSTANT, substr)
-      in functions -> Token(TokenType.FUNCTION, substr)
-      else -> Token(TokenType.VARIABLE, substr)
+      in constants -> Ok<Token, String>(Token(TokenType.CONSTANT, substr))
+      in functions -> Ok<Token, String>(Token(TokenType.FUNCTION, substr))
+      else -> Ok<Token, String>(Token(TokenType.VARIABLE, substr))
     }
   }
 }

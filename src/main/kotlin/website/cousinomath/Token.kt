@@ -7,6 +7,8 @@ enum class TokenType {
     STAR,
     SLASH,
     CARET,
+    LPAREN,
+    RPAREN,
     NUMBER,
     FUNCTION,
     VARIABLE,
@@ -14,4 +16,4 @@ enum class TokenType {
     EOI,
 }
 
-data class Token(val type: TokenType, val lexeme: String, val token: Any? = null)
+data class Token(val type: TokenType, val lexeme: String, val token: Double? = null)

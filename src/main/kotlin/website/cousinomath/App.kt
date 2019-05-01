@@ -8,8 +8,13 @@ fun main(args: Array<String>) {
     if (input == null) {
       continueLoop = false
     } else {
-      val token: List<Token> = Scanner(input).lex()
-      token.forEach { print("$it") }
+      val result: Result<List<Token>, String> = Scanner(input).lex()
+      if (result.isErr) {
+        println(result.err!!)
+        continue
+      }
+      val tokens = result.ok!!
+      tokens.forEach { print("$it") }
       println("")
     }
   }

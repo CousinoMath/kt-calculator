@@ -25,6 +25,8 @@ class Parser(val tokens: List<Token>) {
     val curToken: Token = peek(0)
     if (curToken.type == TokenType.VARIABLE) {
       if (peek(1).type == TokenType.EQUALS) {
+        advance()
+        advance()
         val exprResult: Result<ASTNode, String> = expression();
         return exprResult.map { expr -> ASTAssign(curToken.lexeme, expr) }
       }
@@ -118,11 +120,13 @@ class Parser(val tokens: List<Token>) {
     var curToken: Token = peek(0)
     var negate: Boolean = false
     if (curToken.type == TokenType.DASH) {
+      advance()
       negate = true
     }
     var atomResult: Result<ASTNode, String> = atom()
     curToken = peek(0)
     if (curToken.type == TokenType.CARET) {
+      advance()
       val exponResult = exponential()
       atomResult = atomResult.flatMap { 
         atom -> exponResult.map { exp -> ASTPower(atom, exp) as ASTNode }
@@ -138,17 +142,20 @@ class Parser(val tokens: List<Token>) {
 
   private fun atom(): Result<ASTNode, String> {
     val curToken: Token = peek(0)
+    advance()
     when (curToken.type) {
       TokenType.NUMBER -> return Ok(ASTNumber(curToken.token!!))
       TokenType.VARIABLE -> return Ok(ASTVariable(curToken.lexeme))
+      TokenType.CONSTANT -> return Ok(ASTConstant(curToken.lexeme))
       TokenType.FUNCTION -> {
         return atom().map { arg -> ASTFunction(curToken.lexeme, arg) }
       }
       TokenType.LPAREN -> {
         val exprResult = expression()
-        if (peek(0).type == TokenType.RPAREN) {
+        if (peek(0).type != TokenType.RPAREN) {
           return Err("Unbalanced parentheses")
         }
+        advance()
         return exprResult
       }
       else -> {

@@ -42,13 +42,14 @@ class Scanner(val source: String) {
 
   private fun lexToken(): Result<Token, String> {
     return when (source[start]) {
-      '+' -> Ok<Token, String>(Token(TokenType.PLUS, substring()))
-      '-' -> Ok<Token, String>(Token(TokenType.DASH, substring()))
-      '*' -> Ok<Token, String>(Token(TokenType.STAR, substring()))
-      '/' -> Ok<Token, String>(Token(TokenType.SLASH, substring()))
-      '=' -> Ok<Token, String>(Token(TokenType.EQUALS, substring()))
-      '(' -> Ok(Token(TokenType.LPAREN, substring()))
-      ')' -> Ok(Token(TokenType.RPAREN, substring()))
+      '+' -> Ok<Token, String>(Token(TokenType.PLUS, "+"))
+      '-' -> Ok<Token, String>(Token(TokenType.DASH, "-"))
+      '*' -> Ok<Token, String>(Token(TokenType.STAR, "*"))
+      '/' -> Ok<Token, String>(Token(TokenType.SLASH, "/"))
+      '=' -> Ok<Token, String>(Token(TokenType.EQUALS, "="))
+      '(' -> Ok(Token(TokenType.LPAREN, "("))
+      ')' -> Ok(Token(TokenType.RPAREN, ")"))
+      '^' -> Ok(Token(TokenType.CARET, "^"))
       in '0'..'9', '.' -> lexNumber()
       in 'a'..'z', in 'A'..'Z' -> lexIdentifier()
       else -> Err<Token, String>("Unrecognized token ${source[start]}.")

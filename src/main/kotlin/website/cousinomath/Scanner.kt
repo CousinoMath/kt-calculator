@@ -12,6 +12,7 @@ class Scanner(val source: String) {
     if (current == 0) {
       while (current < length) {
         skipWhitespace()
+        if (current >= length) { break; }
         start = current
         advance()
         val result = lexToken()
